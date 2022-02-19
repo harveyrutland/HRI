@@ -2,13 +2,111 @@ import pygame
 import os
 import time
 import numpy as np
-import itertools
 from pygame.locals import *
+
+def count_routine(rep, initiated_time, count, keynum, skip_wait):
+    current_time = pygame.time.get_ticks()
+    # print("cxurrent time %d" %current_time)
+    # print("start time %d" %initiated_time)
+    delta = current_time - initiated_time
+    print("time delta %d" %delta)
+    # print("rep number %d" %rep)
+    print(count)
+    
+   
+
+    if (delta) >= 1500 and skip_wait == False:
+
+        initiated_time = starttime_reset()
+        
+        new_count = count+1
+        # print(rep)
+        if new_count > rep-1:
+            keynum +=1
+            count = 0
+        else:
+            count = new_count
+    
+    elif skip_wait == True:
+
+        
+        
+        new_count = count + 1
+        # print(rep)
+        if new_count > rep-1:
+            keynum +=1
+            count = 0
+        else:
+            count = new_count
+
+        skip_wait = False
+        initiated_time = starttime_reset()
+    
+    return initiated_time, count, keynum, skip_wait
+
+
+def starttime_reset():
+    # print("start time reset")
+    time = pygame.time.get_ticks()
+    return time
+
+    
+def print_repCount():
+    string = 'Current rep number: {}  Total reps:{}'.format(count, rep_count-1)
+    text = font.render(string, True, white, blue)
+    textRect = text.get_rect()
+    textRect.center = (X // 2, Y // 1.5)
+    display_surface.blit(text, textRect)  
+
+def print_continue():
+    string = 'Press [y] to continue and [n] to exit'
+    text = font2.render(string, False, black)
+    textRect = text.get_rect()
+    textRect.center = (X // 2, Y // 1.2)
+    display_surface.blit(text, textRect)
+    wait = True
+    return wait
+
+
+def waiting(w):
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_y:
+                    w = False
+                    return w
+                    
+                elif event.key == pygame.K_n:
+                    quit()
+
+def New_routineCountdown():
+    countdownls = [5,4,3,2,1]
+    for i in countdownls:
+
+       
+        background_colour = (255,255,255)
+        display_surface.fill(background_colour)
+        string = str(i)
+        text = font2.render(string, False, black)
+        textRect = text.get_rect()
+        textRect.center = (X // 2, Y // 1.2)
+        display_surface.blit(text, textRect)
+        pygame.display.update()
+        pygame.time.wait(1000)
+    new_routine = False
+    return new_routine 
+
+
+
+        
+       
+
 
 pygame.init()
 
 #variables
 white = (0, 0, 0)
+black = (0, 0, 0)
 green = (0, 255, 0)
 blue = (255, 255, 255)
 X = 900
@@ -21,6 +119,12 @@ textRect.center = (X // 2, Y // 1.5)
 c = white
 keynum = 0
 i = 0
+start_time = starttime_reset()
+count = 0
+wait = False
+skip_wait = False
+font2 = pygame.font.Font('freesansbold.ttf', 30)
+
 
 #images
 exercise1 = pygame.image.load(r'/home/harvey/HRI/images/exercise1.png')
@@ -34,143 +138,51 @@ exercise5 = pygame.image.load(r'/home/harvey/HRI/images/exercise5.png')
 
 
 ex_dict = {
-    exercise1 : 3, 
-    exercise2 : 8,
-    exercise3 : 40,
-    exercise4 : 50,
+    exercise1 : 5, 
+    exercise2 : 7,
+    exercise3 : 3,
+    exercise4 : 10,
     exercise5 : 60,
 }
 
 
-def count_routine(rep, initiated_time, count, keynum):
-    current_time = pygame.time.get_ticks()
-    # print("cxurrent time %d" %current_time)
-    # print("start time %d" %initiated_time)
-    delta = current_time - initiated_time
-    # print("time delta %d" %delta)
-    # print("rep number %d" %rep)
-    if (delta) >= 1500 :
-
-        initiated_time = starttime_reset()
-        
-        new_count = count+1
-        # print(rep)
-        if new_count > rep-1:
-            keynum +=1
-            count = 0
-        else:
-            count = new_count
-    
-    return initiated_time, count, keynum
 
 
-def starttime_reset():
-    # print("start time reset")
-    time = pygame.time.get_ticks()
-    return time
-
-    
-def print_repCount():
-    string = 'Current rep number: {}  Total reps:{}'.format(count + 1, rep_count)
-    text = font.render(string, True, white, blue)
-    textRect = text.get_rect()
-    textRect.center = (X // 2, Y // 1.5)
-    display_surface.blit(text, textRect)  
-
-def print_continue():
-    string = 'Press [y] to continue and [n] to exit'
-    font = pygame.font.Font('freesansbold.ttf', 20)
-    text = font.render(string, True, white, blue)
-    textRect = text.get_rect()
-    textRect.center = (X // 2, Y // 1.2)
-    display_surface.blit(text, textRect)
-    wait = 1
-    return wait
-
-
-
-
-
-def waiting(wait):
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                quit()
-
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_y:
-                    wait = 0
-                    return
-                elif event.key == pygame.K_n:
-                    quit()
-
- 
-  
-
-
-
-
-
+currentkeynum = keynum 
 pygame.display.set_caption('test routine')
-start_time = starttime_reset()
-count = 0
-wait = 0
+new_routine = True
 while True:
+
+    if new_routine == True:
+        new_routine = New_routineCountdown()
+
     pygame.display.update()
 
-    exercise = list(ex_dict.keys())[keynum]
+    if wait == True:
+            wait = waiting(wait)
+            new_routine = New_routineCountdown()
+            skip_wait = True
+    else:
+        exercise = list(ex_dict.keys())[keynum]
+        exercise1 = pygame.transform.scale(exercise, (900, 900))
+        
 
-
-    
-    if wait == 1:
-        wait = waiting(wait)
- 
-
-
-
-    exercise1 = pygame.transform.scale(exercise, (900, 900))
-    display_surface.blit(exercise1, (0, 0))
-    rep_count = ex_dict[exercise]
-  
-
-   
         
     
-    # print("count number %d" %count)
+    
+    rep_count = ex_dict[exercise]
 
-    start_time, count, keynum = count_routine(rep_count, start_time, count, keynum)
-    print(count)
-    print(rep_count)
-    print_repCount()  
-
+    start_time, count, keynum, skip_wait = count_routine(rep_count, start_time, count, keynum, skip_wait)
+    # print(count)
+    display_surface.blit(exercise1, (0, 0))
+    # print(rep_count)
+    print_repCount() 
+ 
 
     if count == rep_count-1:
         wait = print_continue()
     
-     
- 
-    # if pygame.key.get_pressed()[pygame.K_a ]:
-    #     c = (0,0,255)
-        
-    #     # display_surface.fill(c)
-       
-    #     font = pygame.font.Font('freesansbold.ttf', 40)
-    #     text = font.render('Are you finished?', True, white, blue)
-    #     textRect = text.get_rect()
-    #     textRect.center = (X // 2, Y // 2)
-     
-        
-        # display_surface.blit(text, textRect)
-        # pygame.display.flip()
+
     
 
-
-
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            # quit the program.
-            quit()
-        # Draws the surface object to the screen.
     
