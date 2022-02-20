@@ -28,8 +28,6 @@ def count_routine(rep, initiated_time, count, keynum, skip_wait):
             count = new_count
     
     elif skip_wait == True:
-
-        
         
         new_count = count + 1
         # print(rep)
@@ -59,7 +57,7 @@ def print_repCount():
     display_surface.blit(text, textRect)  
 
 def print_continue():
-    string = 'Press [y] to continue and [n] to exit'
+    string = 'Did you finish the exercise? Yes [y] / No [n]'
     text = font2.render(string, False, black)
     textRect = text.get_rect()
     textRect.center = (X // 2, Y // 1.2)
@@ -68,24 +66,57 @@ def print_continue():
     return wait
 
 
-def waiting(w):
+def waiting(w, keynum, calculate_data):
     while True:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_y:
+                    exercise_num[keynum] = 1
                     w = False
-                    return w
+                    return w, calculate_data
                     
                 elif event.key == pygame.K_n:
-                    quit()
+                    exercise_num[keynum] = 0
+                    background_colour = (255,255,255)
+                    display_surface.fill(background_colour)
+                    string = 'Do you wish to continue? Yes [y] / No [n]'
+                    text = font2.render(string, False, black)
+                    textRect = text.get_rect()
+                    textRect.center = (X // 2, Y//2)
+                    display_surface.blit(text, textRect)
+                    pygame.display.update()
+                    while True:
+                        for event in pygame.event.get():
+                            if event.type == pygame.KEYDOWN:
+                                if event.key == pygame.K_y:
+                                    w = False
+                                    return w, calculate_data
+                                elif event.key == pygame.K_n:
+                                    calculate_data = True
+                                    return w, calculate_data
+    
 
-def New_routineCountdown():
-    countdownls = [5,4,3,2,1]
+
+    
+
+                    
+
+def New_routineCountdown(keynum):
+    countdownls = [5,4,3,2,1,0]
+  
     for i in countdownls:
 
        
-        background_colour = (255,255,255)
-        display_surface.fill(background_colour)
+        # background_colour = (255,255,255)
+        # display_surface.fill(background_colour)
+        exercise = list(ex_dict.keys())[keynum]
+        exercise1 = pygame.transform.scale(exercise, (900, 900))
+        display_surface.blit(exercise1, (0, 0))
+        string = 'Next exercise'
+        text = font2.render(string, False, black)
+        textRect = text.get_rect()
+        textRect.center = (X // 2, Y // 4)
+        display_surface.blit(text, textRect)
         string = str(i)
         text = font2.render(string, False, black)
         textRect = text.get_rect()
@@ -95,6 +126,16 @@ def New_routineCountdown():
         pygame.time.wait(1000)
     new_routine = False
     return new_routine 
+
+
+def splash_screen(show_splashscreen):
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    show_splashscreen = 0
+                    return show_splashscreen
+
 
 
 
@@ -126,6 +167,13 @@ skip_wait = False
 font2 = pygame.font.Font('freesansbold.ttf', 30)
 
 
+
+
+####
+exercise_num = {}
+
+
+
 #images
 exercise1 = pygame.image.load(r'/home/harvey/HRI/images/exercise1.png')
 exercise2 = pygame.image.load(r'/home/harvey/HRI/images/exercise2.png')
@@ -146,42 +194,81 @@ ex_dict = {
 }
 
 
-
-
-currentkeynum = keynum 
+calculate_data = False
+keynum = 0
 pygame.display.set_caption('test routine')
 new_routine = True
+show_splashscreen = 1
+print('completed exercises:->', exercise_num)
+
+  
 while True:
 
-    if new_routine == True:
-        new_routine = New_routineCountdown()
 
-    pygame.display.update()
+    if show_splashscreen == 1:
+        calculate_data = False
+        keynum = 0
+        new_routine = True
+        wait = False
+        # print('completed exercises:->', exercise_num)
+        background_colour = (255,255,255)
+        display_surface.fill(background_colour)
+        string = 'Thank you for participating'
+        text = font2.render(string, False, black)
+        textRect = text.get_rect()
+        textRect.center = (X // 2, Y//2)
+        display_surface.blit(text, textRect)
+        pygame.display.update()
+        show_splashscreen = splash_screen(show_splashscreen)
+        
+     
+                                
+    
 
-    if wait == True:
-            wait = waiting(wait)
-            new_routine = New_routineCountdown()
-            skip_wait = True
     else:
-        exercise = list(ex_dict.keys())[keynum]
-        exercise1 = pygame.transform.scale(exercise, (900, 900))
+
+        if calculate_data == True:
+            show_splashscreen = 1
+
+        if new_routine == True and show_splashscreen == 0:
+            new_routine = New_routineCountdown(keynum)
+        
+
+        pygame.display.update()
+
+        if wait == True and show_splashscreen == 0:
+                wait, calculate_data = waiting(wait, keynum, calculate_data)
+                # keynum = keynum+1
+                if calculate_data == False:
+                    new_routine = New_routineCountdown(keynum+1)
+                skip_wait = True
+        else:
+            exercise = list(ex_dict.keys())[keynum]
+            exercise1 = pygame.transform.scale(exercise, (900, 900))
+            display_surface.blit(exercise1, (0, 0))
         
 
         
-    
-    
-    rep_count = ex_dict[exercise]
+        
+        rep_count = ex_dict[exercise]
 
-    start_time, count, keynum, skip_wait = count_routine(rep_count, start_time, count, keynum, skip_wait)
-    # print(count)
-    display_surface.blit(exercise1, (0, 0))
-    # print(rep_count)
-    print_repCount() 
- 
+        start_time, count, keynum, skip_wait = count_routine(rep_count, start_time, count, keynum, skip_wait)
+        # print(count)
+        # print(rep_count)
+        print_repCount() 
 
-    if count == rep_count-1:
-        wait = print_continue()
-    
+
+        if count == rep_count-1:
+            wait = print_continue()
+        
+        
+            # print('completed exercises:->', exercise_num)
+            # keynum = 0
+            # exercise_num = {}
+            # calculate_data = False
+            # new_routine = False
+        
+
 
     
 
